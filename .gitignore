@@ -1,0 +1,41 @@
+# Python
+.eggs
+.pytest_cache
+*.pyc
+distribute*
+build
+dist
+pytest_runner*.egg
+__pycache__
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.venv
+
+# IntelliJ files
+.idea
+.idea_modules
+*.iml
+*.iws
+out
+gen
+
+# OS crap
+*~
+._*
+.Apple*
+.DS_Store
+.fuse_hidden
+Network Trash Folder
+.nfs*
+.TemporaryItems
+Temporary Items
+.Trash-*
+.Trashes
+.VolumeIcon.icns
+
+# Tool outputs
+*.out
+*.test
