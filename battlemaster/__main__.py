@@ -1,3 +1,4 @@
+from logbook.compat import redirect_logging
 from triotp import node, application
 from triotp.helpers import current_module
 from triotp.logging import LogLevel, getLogger
@@ -9,11 +10,12 @@ __module__ = current_module()
 
 
 def main():
+    redirect_logging()
     log_level = LogLevel.DEBUG if settings.debug else LogLevel.INFO
 
     node.run(
         loglevel=log_level,
-        logformat="[{record.time:%Y-%m-%d %H:%M:%S.%f%z}|{record.level_name:.5}] {record.message} ({record.channel})",
+        logformat="[{record.time:%Y-%m-%d %H:%M:%S.%f%z}|{record.level_name:5.5}] {record.message} ({record.channel})",
         apps=[
             application.app_spec(
                 module=__module__,
