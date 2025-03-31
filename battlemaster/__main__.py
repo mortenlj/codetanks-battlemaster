@@ -9,9 +9,6 @@ from battlemaster.config import settings
 
 __module__ = current_module()
 
-from battlemaster.k8s.resources import battle
-from battlemaster.servers import manager
-
 
 def main():
     redirect_logging()
@@ -34,12 +31,7 @@ async def start(_start_arg):
     logger = getLogger(__name__)
     logger.debug(f"Starting BattleMaster with configuration {settings}")
     client = AsyncClient()
-    await app_supervisor.start(client, [
-        manager.ReconcilerConfig(
-            name="battle",
-            resource=battle.Battle,
-        ),
-    ])
+    await app_supervisor.start(client)
 
 
 if __name__ == '__main__':

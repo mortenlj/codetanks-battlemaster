@@ -2,10 +2,9 @@ from lightkube import AsyncClient
 from triotp import supervisor
 
 from battlemaster import asgi, servers
-from battlemaster.servers import manager
 
 
-async def start(client: AsyncClient, configs: list[manager.ReconcilerConfig]):
+async def start(client: AsyncClient):
     children = [
         supervisor.child_spec(
             id='asgi',
@@ -15,7 +14,7 @@ async def start(client: AsyncClient, configs: list[manager.ReconcilerConfig]):
         supervisor.child_spec(
             id='servers',
             task=servers.start,
-            args=[client, configs],
+            args=[client],
         ),
     ]
     opts = supervisor.options(
