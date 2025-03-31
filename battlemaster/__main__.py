@@ -1,3 +1,4 @@
+from lightkube import AsyncClient
 from logbook.compat import redirect_logging
 from triotp import node, application
 from triotp.helpers import current_module
@@ -7,6 +8,9 @@ from battlemaster import app_supervisor
 from battlemaster.config import settings
 
 __module__ = current_module()
+
+from battlemaster.k8s.resources import battle
+from battlemaster.servers import manager
 
 
 def main():
@@ -29,7 +33,13 @@ def main():
 async def start(_start_arg):
     logger = getLogger(__name__)
     logger.debug(f"Starting BattleMaster with configuration {settings}")
-    await app_supervisor.start()
+    client = AsyncClient()
+    await app_supervisor.start(client, [
+        manager.ReconcilerConfig(
+            name="battle",
+            resource=battle.Battle,
+        ),
+    ])
 
 
 if __name__ == '__main__':
