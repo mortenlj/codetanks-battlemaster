@@ -1,13 +1,9 @@
-from hypercorn.config import Config
 from triotp import supervisor
 
 from battlemaster import asgi
 
 
 async def start():
-    config = Config()
-    config.bind = ["localhost:8000"]
-
     children = [
         supervisor.child_spec(
             id='asgi',

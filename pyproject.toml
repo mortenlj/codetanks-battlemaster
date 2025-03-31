@@ -9,6 +9,7 @@ dependencies = [
     "hypercorn>=0.17.3",
     "lightkube>=0.17.1",
     "pyaml>=25.1.0",
+    "pydantic-settings>=2.8.1",
     "pyyaml>=6.0.2",
     "trio>=0.29.0",
     "triotp>=0.3.0",
