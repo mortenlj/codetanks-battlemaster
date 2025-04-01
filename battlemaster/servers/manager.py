@@ -1,3 +1,4 @@
+import types
 from dataclasses import dataclass
 
 from lightkube import AsyncClient
@@ -10,8 +11,12 @@ from battlemaster.servers import informer
 
 @dataclass
 class ReconcilerConfig:
-    name: str
     resource: resource.Resource
+    reconciler: types.ModuleType
+
+    @property
+    def name(self):
+        return self.reconciler.__name__
 
 
 async def start(client: AsyncClient, configs: list[ReconcilerConfig]):
@@ -25,5 +30,12 @@ async def start(client: AsyncClient, configs: list[ReconcilerConfig]):
             args=[rc.resource, client, rc.name],
         ) for rc in configs
     ]
+    children.extend([
+        supervisor.child_spec(
+            id=rc.name,
+            task=rc.reconciler.start,
+            args=[rc.name],
+        ) for rc in configs
+    ])
 
     await supervisor.start(children, opts)

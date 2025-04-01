@@ -8,8 +8,8 @@ from battlemaster.servers import manager, battle
 async def start(client: AsyncClient):
     configs = [
         manager.ReconcilerConfig(
-            name="battle",
             resource=Battle,
+            reconciler=battle,
         )
     ]
     children = [
@@ -17,11 +17,6 @@ async def start(client: AsyncClient):
             id='manager',
             task=manager.start,
             args=[client, configs],
-        ),
-        supervisor.child_spec(
-            id='battle',
-            task=battle.start,
-            args=["battle"],
         ),
     ]
     opts = supervisor.options()
