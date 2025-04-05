@@ -152,6 +152,7 @@ def crd(res: resource.Resource):
         ),
     )
 
+    print("---")
     pyaml.p(crd.to_dict(), vspacing=False)
 
 
