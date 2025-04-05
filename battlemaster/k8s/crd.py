@@ -23,31 +23,19 @@ def _resolve_refs(defs, value):
     return value
 
 
-def _make_crd_schema(schema, defs=None):
-    if defs is None:
-        defs = {}
-    crd_schema = {}
-    defs.update(schema.get("$defs", {}))
-    for key, value in defs.items():
-        defs[key] = _resolve_refs(defs, value)
-    if isinstance(schema, dict) and "$ref" in schema:
-        return _resolve_refs(defs, schema)
-    for key, value in schema.items():
-        if key in ("$schema", "$defs", "default"):
-            continue
-        elif isinstance(value, dict):
-            crd_schema[key] = _make_crd_schema(value, defs)
-        elif isinstance(value, list):
-            items = []
-            for item in value:
-                if isinstance(item, dict):
-                    items.append(_make_crd_schema(item, defs))
-                else:
-                    items.append(item)
-            crd_schema[key] = items
-        else:
-            crd_schema[key] = value
-    return crd_schema
+def _eliminate_unwanted_keys(obj):
+    if isinstance(obj, dict):
+        crd_schema = {}
+        for key, value in obj.items():
+            if key in ("$schema", "$defs"):
+                continue
+            if key == "default" and not value:
+                continue
+            crd_schema[key] = _eliminate_unwanted_keys(value)
+        return crd_schema
+    elif isinstance(obj, list):
+        return [_eliminate_unwanted_keys(item) for item in obj]
+    return obj
 
 
 def _resolve_nullable(obj):
@@ -94,7 +82,24 @@ def _drop_implicit(schema: dict):
     """Kubernetes assumes all schemas have apiVersion, kind and metadata, so they should be dropped."""
     for ign in ("apiVersion", "kind", "metadata"):
         schema["properties"].pop(ign, None)
+        schema["required"].remove(ign) if ign in schema["required"] else None
     return schema
+
+
+def _extract_defs(obj):
+    defs = {}
+    if isinstance(obj, dict):
+        if "$defs" in obj:
+            for key, value in obj["$defs"].items():
+                defs[key] = value
+            del obj["$defs"]
+        for key, value in obj.items():
+            defs.update(_extract_defs(value))
+        return defs
+    elif isinstance(obj, list):
+        for item in obj:
+            defs.update(_extract_defs(item))
+    return defs
 
 
 def crd(res: resource.Resource):
@@ -105,7 +110,11 @@ def crd(res: resource.Resource):
 
     schema = get_schema(res)
     schema = _drop_implicit(schema)
-    crd_schema = _make_crd_schema(schema)
+    defs = _extract_defs(schema)
+    for key, item in defs.items():
+        defs[key] = _resolve_refs(defs, item)
+    schema = _resolve_refs(defs, schema)
+    crd_schema = _eliminate_unwanted_keys(schema)
     crd_schema = _resolve_nullable(crd_schema)
     crd_schema = _resolve_single_all_ofs(crd_schema)
     json_schema_props = JSONSchemaProps(**crd_schema)
@@ -143,10 +152,7 @@ def crd(res: resource.Resource):
         ),
     )
 
-    # TODO: Remove after comparison with kube.rs is done
-    pyaml.add_representer( bool,
-                 lambda s,o: s.represent_scalar('tag:yaml.org,2002:bool', ['false', 'true'][o]) )
-    pyaml.p(crd.to_dict())
+    pyaml.p(crd.to_dict(), vspacing=False)
 
 
 def main():
