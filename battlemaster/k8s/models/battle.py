@@ -25,7 +25,7 @@ class BattleSpec(DataclassDictMixIn):
 class BattleStatus(DataclassDictMixIn):
     observedGeneration: int
     conditions: list[meta_v1.Condition]
-    server: Server
+    server: Optional[Server] = None
 
 
 @dataclass
