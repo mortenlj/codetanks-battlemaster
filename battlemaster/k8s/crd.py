@@ -114,6 +114,7 @@ def crd(res: resource.Resource):
         name=api_info.resource.version,
         served=True,
         storage=True,
+        additionalPrinterColumns=[],
         schema=CustomResourceValidation(
             openAPIV3Schema=json_schema_props,
         ),
@@ -135,12 +136,16 @@ def crd(res: resource.Resource):
                 plural=api_info.plural,
                 singular=api_info.resource.kind.lower(),
                 shortNames=[],
+                categories=[],
             ),
             scope=scope,
             versions=[version],
         ),
     )
 
+    # TODO: Remove after comparison with kube.rs is done
+    pyaml.add_representer( bool,
+                 lambda s,o: s.represent_scalar('tag:yaml.org,2002:bool', ['false', 'true'][o]) )
     pyaml.p(crd.to_dict())
 
 
