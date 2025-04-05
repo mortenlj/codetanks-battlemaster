@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 
 from lightkube.core.dataclasses_dict import DataclassDictMixIn
@@ -23,8 +23,8 @@ class BattleSpec(DataclassDictMixIn):
 
 @dataclass
 class BattleStatus(DataclassDictMixIn):
-    observedGeneration: int
-    conditions: list[meta_v1.Condition]
+    conditions: list[meta_v1.Condition] = field(default_factory=list)
+    observedGeneration: Optional[int] = None
     server: Optional[Server] = None
 
 
