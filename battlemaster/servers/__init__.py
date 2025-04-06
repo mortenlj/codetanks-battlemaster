@@ -2,7 +2,8 @@ from lightkube import AsyncClient
 from triotp import supervisor
 
 from battlemaster.k8s.resources.battle import Battle
-from battlemaster.servers import manager, battle
+from battlemaster.servers import manager
+from battlemaster.reconcilers import battle
 
 
 async def start(client: AsyncClient):
