@@ -2,13 +2,14 @@ from lightkube import AsyncClient
 from triotp import supervisor
 
 from battlemaster.k8s.resources.battle import Battle
-from battlemaster.servers import manager
 from battlemaster.reconcilers import battle
+from battlemaster.servers import manager
+from battlemaster.servers.types import ReconcilerConfig
 
 
 async def start(client: AsyncClient):
     configs = [
-        manager.ReconcilerConfig(
+        ReconcilerConfig(
             resource=Battle,
             reconciler=battle,
         )

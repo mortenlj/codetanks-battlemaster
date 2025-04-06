@@ -1,22 +1,9 @@
-import types
-from dataclasses import dataclass
-
 from lightkube import AsyncClient
-from lightkube.core import resource
 from triotp import supervisor
 from triotp.logging import getLogger
 
 from battlemaster.servers import informer
-
-
-@dataclass
-class ReconcilerConfig:
-    resource: resource.Resource
-    reconciler: types.ModuleType
-
-    @property
-    def name(self):
-        return self.reconciler.__name__
+from battlemaster.servers.types import ReconcilerConfig
 
 
 async def start(client: AsyncClient, configs: list[ReconcilerConfig]):
