@@ -12,7 +12,7 @@ async def start(client: AsyncClient):
         ReconcilerConfig(
             name='battle',
             resource=Battle,
-            reconciler=battle.Reconciler(),
+            reconciler=battle.Reconciler(client),
         )
     ]
     children = [
