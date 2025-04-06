@@ -10,8 +10,9 @@ from battlemaster.servers.types import ReconcilerConfig
 async def start(client: AsyncClient):
     configs = [
         ReconcilerConfig(
+            name='battle',
             resource=Battle,
-            reconciler=battle,
+            reconciler=battle.Reconciler(),
         )
     ]
     children = [

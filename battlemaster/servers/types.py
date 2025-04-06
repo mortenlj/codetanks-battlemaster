@@ -1,17 +1,8 @@
-import types
+import typing
+from abc import abstractmethod
 from dataclasses import dataclass
 
 from lightkube.core import resource
-
-
-@dataclass
-class ReconcilerConfig:
-    resource: resource.Resource
-    reconciler: types.ModuleType
-
-    @property
-    def name(self):
-        return self.reconciler.__name__
 
 
 @dataclass
@@ -28,3 +19,17 @@ class Key:
 
     def __repr__(self):
         return f"Key({self.name}, {self.namespace})"
+
+
+class Reconciler(typing.Protocol):
+    @abstractmethod
+    async def reconcile(self, key: Key):
+        """Reconcile the resource with the given key."""
+        raise NotImplementedError()
+
+
+@dataclass
+class ReconcilerConfig:
+    name: str
+    resource: resource.Resource
+    reconciler: Reconciler
