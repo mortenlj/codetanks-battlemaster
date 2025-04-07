@@ -1,7 +1,9 @@
-from lightkube import AsyncClient
+from lightkube import AsyncClient, ApiError
+from lightkube.models.meta_v1 import ObjectMeta
 from triotp.logging import getLogger
 
-from battlemaster.k8s.resources.battle import Battle
+from battlemaster.k8s.models import battle as m_battle
+from battlemaster.k8s.resources import battle as r_battle
 
 
 class Reconciler:
@@ -11,5 +13,30 @@ class Reconciler:
     async def reconcile(self, key):
         logger = getLogger(__name__)
         logger.info(f"Reconciling {key}")
-        battle = await self._client.get(Battle, name=key.name, namespace=key.namespace)
+        try:
+            battle = await self._client.get(r_battle.Battle, name=key.name, namespace=key.namespace)
+        except ApiError as e:
+            if e.status.code == 404:
+                logger.info(f"Battle {key} not found, already deleted?")
+                return None
         logger.info(f"Found Battle: {battle}")
+        battle.status = battle.status or m_battle.BattleStatus()
+        status = battle.status
+        try:
+            status.observedGeneration = battle.metadata.generation
+            logger.info(f"Observed generation: {status.observedGeneration}")
+            # TODO: self.do_stuff(battle)
+        finally:
+            battle_status = r_battle.Battle.Status(
+                apiVersion=battle.apiVersion,
+                kind=battle.kind,
+                metadata=ObjectMeta(
+                    name=battle.metadata.name,
+                    namespace=battle.metadata.namespace,
+                    resourceVersion=battle.metadata.resourceVersion,
+                ),
+                spec=battle.spec,
+                status=battle.status,
+            )
+            await self._client.apply(battle_status, name=key.name, namespace=key.namespace,
+                                     field_manager="codetanks.ibidem.no/battlemaster")
