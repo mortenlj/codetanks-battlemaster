@@ -17,17 +17,23 @@ class Reconciler:
         except ApiError as e:
             if e.status.code == 404:
                 logger.info(f"Battle {key} not found, already deleted?")
-                return None
+                return
         logger.info(f"Found Battle: {battle}")
-        battle.status = battle.status or m_battle.BattleStatus()
-        status = battle.status
+        status = battle.status or m_battle.BattleStatus()
+
+        if battle.metadata.generation == status.observedGeneration:
+            logger.info(f"Battle {key} already reconciled, skipping")
+            return
+
         try:
             status.observedGeneration = battle.metadata.generation
             logger.info(f"Observed generation: {status.observedGeneration}")
             # TODO: self.do_stuff(battle)
-        finally:
+
             battle_status = r_battle.Battle.Status(
-                status=battle.status,
+                status=status,
             )
             await self._client.apply(battle_status, name=key.name, namespace=key.namespace,
                                      field_manager="codetanks.ibidem.no/battlemaster")
+        except Exception as e:
+            logger.error(f"Error reconciling {key}: {e}")
