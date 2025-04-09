@@ -28,14 +28,6 @@ class Reconciler:
             # TODO: self.do_stuff(battle)
         finally:
             battle_status = r_battle.Battle.Status(
-                apiVersion=battle.apiVersion,
-                kind=battle.kind,
-                metadata=ObjectMeta(
-                    name=battle.metadata.name,
-                    namespace=battle.metadata.namespace,
-                    resourceVersion=battle.metadata.resourceVersion,
-                ),
-                spec=battle.spec,
                 status=battle.status,
             )
             await self._client.apply(battle_status, name=key.name, namespace=key.namespace,

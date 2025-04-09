@@ -23,15 +23,15 @@ class BattleSpec(DataclassDictMixIn):
 
 @dataclass
 class BattleStatus(DataclassDictMixIn):
-    conditions: list[meta_v1.Condition] = field(default_factory=list)
+    conditions: Optional[list[meta_v1.Condition]] = None
     observedGeneration: Optional[int] = None
     server: Optional[Server] = None
 
 
 @dataclass
 class Battle(DataclassDictMixIn):
-    apiVersion: str
-    kind: str
-    metadata: meta_v1.ObjectMeta
-    spec: BattleSpec
+    apiVersion: Optional[str] = None
+    kind: Optional[str] = None
+    metadata: Optional[meta_v1.ObjectMeta] = None
+    spec: Optional[BattleSpec] = None
     status: Optional[BattleStatus] = None

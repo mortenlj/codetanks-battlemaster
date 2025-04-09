@@ -82,7 +82,7 @@ def _drop_implicit(schema: dict):
     """Kubernetes assumes all schemas have apiVersion, kind and metadata, so they should be dropped."""
     for ign in ("apiVersion", "kind", "metadata"):
         schema["properties"].pop(ign, None)
-        schema["required"].remove(ign) if ign in schema["required"] else None
+        schema["required"].remove(ign) if ign in schema.get("required", []) else None
     return schema
 
 
