@@ -1,5 +1,4 @@
 from lightkube import AsyncClient, ApiError
-from lightkube.models.meta_v1 import ObjectMeta
 from triotp.logging import getLogger
 
 from battlemaster.k8s.models import battle as m_battle
