@@ -1,35 +1,34 @@
-from dataclasses import dataclass, field
 from typing import Optional
 
-from lightkube.core.dataclasses_dict import DataclassDictMixIn
+from lightkube.core.schema import DictMixin, dataclass
 from lightkube.models import meta_v1
 
 
 @dataclass
-class Server(DataclassDictMixIn):
+class Server(DictMixin):
     combatantUrl: str
     viewerUrl: str
 
 
 @dataclass
-class Combatant(DataclassDictMixIn):
+class Combatant(DictMixin):
     name: str
 
 
 @dataclass
-class BattleSpec(DataclassDictMixIn):
+class BattleSpec(DictMixin):
     combatants: list[Combatant]
 
 
 @dataclass
-class BattleStatus(DataclassDictMixIn):
+class BattleStatus(DictMixin):
     conditions: Optional[list[meta_v1.Condition]] = None
     observedGeneration: Optional[int] = None
     server: Optional[Server] = None
 
 
 @dataclass
-class Battle(DataclassDictMixIn):
+class Battle(DictMixin):
     apiVersion: Optional[str] = None
     kind: Optional[str] = None
     metadata: Optional[meta_v1.ObjectMeta] = None

@@ -1,23 +1,23 @@
-from dataclasses import dataclass
+from typing import Optional
 
-from lightkube.core.dataclasses_dict import DataclassDictMixIn
+from lightkube.core.schema import DictMixin, dataclass
 from lightkube.models import meta_v1
 
 
 @dataclass
-class Owner(DataclassDictMixIn):
+class Owner(DictMixin):
     name: str
 
 
 @dataclass
-class TankSpec(DataclassDictMixIn):
+class TankSpec(DictMixin):
     image: str
     owner: Owner
 
 
 @dataclass
-class Tank(DataclassDictMixIn):
-    apiVersion: str
-    kind: str
-    metadata: meta_v1.ObjectMeta
-    spec: TankSpec
+class Tank(DictMixin):
+    apiVersion: Optional[str] = None
+    kind: Optional[str] = None
+    metadata: Optional[meta_v1.ObjectMeta] = None
+    spec: Optional[TankSpec] = None
