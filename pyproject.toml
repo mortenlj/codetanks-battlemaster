@@ -3,7 +3,7 @@ name = "codetanks-battlemaster"
 version = "0.1.0"
 description = "Codetanks BattleMaster"
 readme = "README.rst"
-requires-python = ">=3.13"
+requires-python = "~=3.13"
 dependencies = [
     "dc-schema>=0.0.8",
     "hypercorn>=0.17.3",
