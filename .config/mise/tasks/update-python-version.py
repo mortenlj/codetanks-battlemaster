@@ -22,6 +22,7 @@ def _update_file(file_path, pattern, version):
 
 def _update_pyproject(version):
     _update_file("pyproject.toml", r"requires-python = \"~=(\d\.\d+)\"", version)
+    _update_file(".dagger/pyproject.toml", r"requires-python = \"~=(\d\.\d+)\"", version)
 
 
 
@@ -31,8 +32,9 @@ def _update_mise(version):
 
 
 def _sync_uv():
-    print("Syncing virtualenv ...")
+    print("Syncing virtualenvs ...")
     subprocess.run(["uv", "sync"], check=True)
+    subprocess.run(["uv", "sync"], check=True, cwd=".dagger")
 
 
 def main():
