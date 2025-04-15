@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: battlemaster
+  namespace: codetanks
+  labels:
+    app: battlemaster
+data:
+  bind_address: "0.0.0.0"
+  mode: "Release"

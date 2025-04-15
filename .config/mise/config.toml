@@ -7,6 +7,10 @@ description = "Build the project in dagger"
 run = "dagger call publish"
 description = "Publish the project to ttl.sh"
 
+[tasks.assemble]
+run = "dagger call assemble --output=build"
+description = "Publish the project, and assemble all manifests"
+
 [tasks.push]
 run = "git push"
 depends = ["publish"]

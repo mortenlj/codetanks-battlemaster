@@ -1,0 +1,24 @@
+---
+apiVersion: yakup.ibidem.no/v1
+kind: Application
+metadata:
+  name: battlemaster
+  namespace: codetanks
+  labels:
+    app: battlemaster
+spec:
+  image: "{{ image }}:{{ version }}"
+  ports:
+    http:
+      port: 3000
+  probes:
+    liveness:
+      http:
+        initialDelaySeconds: 10
+        portName: http
+        path: /_/live
+    readiness:
+      http:
+        initialDelaySeconds: 10
+        portName: http
+        path: /_/ready
