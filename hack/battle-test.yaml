@@ -1,0 +1,11 @@
+apiVersion: codetanks.ibidem.no/v1
+kind: Battle
+metadata:
+  name: test
+  namespace: default
+spec:
+  combatants:
+    - name: uno
+    - name: two
+    - name: three
+    - name: four
