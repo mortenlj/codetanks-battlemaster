@@ -11,7 +11,9 @@ from battlemaster.config import settings
 async def start():
     config = Config()
     config.bind = [f"{settings.bind_address}:{settings.port}"]
-    config.accesslog = logging.getLogger('hypercorn.access')
+    access_logger = logging.getLogger('hypercorn.access')
+    access_logger.setLevel(logging.WARNING)
+    config.accesslog = access_logger
     config.errorlog = logging.getLogger('hypercorn.error')
 
     children = [
