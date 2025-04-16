@@ -87,6 +87,7 @@ jobs:
         uses: mortenlj/kube-actions/apply-manifest@main
         with:
           appname: battlemaster
+          namespace: codetanks
       - name: Leave ZeroTier network
         if: always()
         uses: mortenlj/zerotier-actions/leave-zt@main
