@@ -8,7 +8,7 @@ run = "dagger call publish"
 description = "Publish the project to ttl.sh"
 
 [tasks.assemble]
-run = "dagger call assemble --output=build"
+run = "dagger call assemble --output=build/assemble"
 description = "Publish the project, and assemble all manifests"
 
 [tasks.push]
