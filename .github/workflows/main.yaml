@@ -1,0 +1,114 @@
+name: Build
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
+
+jobs:
+  setup:
+    name: Set variables
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: "Set image version"
+        id: constants
+        run: |
+          export version="$(date +%Y%m%d%H%M%S)-$(git describe --always --dirty --exclude '*')"
+          echo "VERSION=${version}" >> ${GITHUB_OUTPUT}
+    outputs:
+      VERSION: "${{ steps.constants.outputs.VERSION }}"
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: setup
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+      checks: write
+      pull-requests: write
+    env:
+      VERSION: "${{ needs.setup.outputs.VERSION }}"
+      DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Login to GitHub Packages Docker Registry
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Assemble manifests and push images
+        uses: dagger/dagger-for-github@b81317a976cb7f7125469707321849737cd1b3bc # v7
+        with:
+          version: "latest"
+          verb: call
+          args: assemble "--image=${IMAGE}" "--version=${VERSION}" --output=build/assemble
+          cloud-token: "${{ secrets.DAGGER_CLOUD_TOKEN }}"
+      - name: Save manifests for later deploy
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: manifests
+          path: build/assemble/*.yaml
+  deploy:
+    name: Deploy
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # This is required for requesting the JWT
+    needs:
+      - setup
+      - build
+    steps:
+      - name: Get kubeconfig
+        uses: mortenlj/kube-actions/get-kubeconfig@main
+      - name: Download manifests from build
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4
+        with:
+          name: manifests
+      - id: join-zt
+        name: Join ZeroTier network
+        uses: mortenlj/zerotier-actions/join-zt@main
+        with:
+          network_id: ${{ secrets.ZEROTIER_NETWORK_ID }}
+          api_accesstoken: ${{ secrets.ZEROTIER_API_ACCESSTOKEN }}
+          ping_target: k3s.home.ibidem.no
+      - name: Run kubectl apply for Battle CRD
+        run: |
+          kubectl apply --filename=battle.yaml --wait=true --timeout=60s
+      - name: Run kubectl apply for application deploy
+        uses: mortenlj/kube-actions/apply-manifest@main
+        with:
+          appname: battlemaster
+      - name: Leave ZeroTier network
+        if: always()
+        uses: mortenlj/zerotier-actions/leave-zt@main
+        with:
+          node_id: ${{ steps.join-zt.outputs.node_id }}
+          network_id: ${{ secrets.ZEROTIER_NETWORK_ID }}
+          api_accesstoken: ${{ secrets.ZEROTIER_API_ACCESSTOKEN }}
+  cleanup:
+    name: Cleanup
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      packages: write
+    steps:
+      - name: Cleanup main images
+        uses: dataaxiom/ghcr-cleanup-action@cd0cdb900b5dbf3a6f2cc869f0dbb0b8211f50c4 # v1.0.16
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          keep-n-tagged: 5
+          older-than: 2 weeks
+          delete-untagged: true
+          delete-ghost-images: true
+          delete-orphaned-images: true
+          delete-partial-images: true
