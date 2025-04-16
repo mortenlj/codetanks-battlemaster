@@ -103,13 +103,22 @@ class CodetanksBattlemaster:
         return "\n".join(published)
 
     @function
-    async def crd(self) -> dagger.File:
+    async def battle_crd(self) -> dagger.File:
+        """Generate CRD"""
+        return await self.crd("battlemaster.k8s.resources.battle.Battle", "battle.yaml")
+
+    @function
+    async def tank_crd(self) -> dagger.File:
+        """Generate CRD"""
+        return await self.crd("battlemaster.k8s.resources.tank.Tank", "tank.yaml")
+
+    async def crd(self, resource: str, filename: str) -> dagger.File:
         """Generate CRD"""
         build = await self.build(await dag.default_platform())
         return (
             build
-            .with_exec(["uv", "run", "crd", "battlemaster.k8s.resources.battle.Battle"], redirect_stdout="battle.yaml")
-            .file("battle.yaml")
+            .with_exec(["uv", "run", "crd", resource], redirect_stdout=filename)
+            .file(filename)
         )
 
     @function
@@ -141,7 +150,8 @@ class CodetanksBattlemaster:
         outputs = dag.directory()
         files = await asyncio.gather(
             self.publish_to_file(self.publish(image, version)),
-            self.crd(),
+            self.battle_crd(),
+            self.tank_crd(),
             self.assemble_manifests(image, version),
         )
         for f in files:

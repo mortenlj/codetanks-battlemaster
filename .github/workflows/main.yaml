@@ -80,9 +80,10 @@ jobs:
           network_id: ${{ secrets.ZEROTIER_NETWORK_ID }}
           api_accesstoken: ${{ secrets.ZEROTIER_API_ACCESSTOKEN }}
           ping_target: k3s.home.ibidem.no
-      - name: Run kubectl apply for Battle CRD
+      - name: Run kubectl apply for CRDs
         run: |
           kubectl apply --filename=battle.yaml --wait=true --timeout=60s
+          kubectl apply --filename=tank.yaml --wait=true --timeout=60s
       - name: Run kubectl apply for application deploy
         uses: mortenlj/kube-actions/apply-manifest@main
         with:
