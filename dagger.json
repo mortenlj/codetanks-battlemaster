@@ -1,6 +1,6 @@
 {
   "name": "codetanks-battlemaster",
-  "engineVersion": "v0.18.3",
+  "engineVersion": "v0.19.3",
   "sdk": {
     "source": "python"
   },
