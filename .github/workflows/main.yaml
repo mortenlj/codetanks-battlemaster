@@ -16,7 +16,7 @@ jobs:
     name: Set variables
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: "Set image version"
         id: constants
         run: |
@@ -38,22 +38,22 @@ jobs:
       VERSION: "${{ needs.setup.outputs.VERSION }}"
       DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Login to GitHub Packages Docker Registry
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Assemble manifests and push images
-        uses: dagger/dagger-for-github@b81317a976cb7f7125469707321849737cd1b3bc # v7
+        uses: dagger/dagger-for-github@27b130bf0f79a7f6fbbbe0fbca6760dc9bb40a77 # v8.4.1
         with:
           version: "latest"
           verb: call
           args: assemble "--image=${IMAGE}" "--version=${VERSION}" --output=build/assemble
           cloud-token: "${{ secrets.DAGGER_CLOUD_TOKEN }}"
       - name: Save manifests for later deploy
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: manifests
           path: build/assemble/*.yaml
@@ -70,7 +70,7 @@ jobs:
       - name: Get kubeconfig
         uses: mortenlj/kube-actions/get-kubeconfig@main
       - name: Download manifests from build
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: manifests
       - id: join-zt
